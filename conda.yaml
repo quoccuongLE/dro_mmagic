@@ -1,0 +1,17 @@
+name: MMagic
+channels:
+  - defaults
+  - pytorch
+  - conda-forge
+dependencies:
+  - python=3.9
+  - pytorch::pytorch=1.12.1
+  - pytorch::torchvision=0.13.1
+  - conda-forge::cudatoolkit=11.3
+  - conda-forge::opencv
+  - conda-forge::matplotlib
+  - matplotlib
+  - pip
+  - pip:
+    - gdown
+    - fire
