@@ -1,4 +1,4 @@
-name: MMagic
+name: mmagic
 channels:
   - defaults
   - pytorch
@@ -13,5 +13,6 @@ dependencies:
   - matplotlib
   - pip
   - pip:
+    - openmim
     - gdown
     - fire
