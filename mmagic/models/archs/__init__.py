@@ -66,6 +66,8 @@ def register_diffusers_models() -> List[str]:
 
     DIFFUSERS_PIPELINES = []
     for pipeline_name in dir(diffusers.pipelines):
+        if pipeline_name == "controlnet_xs" and diffusers.__version__ in ["0.26.2", "0.26.1", "0.26.0", "0.25.1", "0.25.0"]:
+            continue
         pipeline = getattr(diffusers.pipelines, pipeline_name)
         if (inspect.isclass(pipeline)
                 and issubclass(pipeline, diffusers.DiffusionPipeline)):
