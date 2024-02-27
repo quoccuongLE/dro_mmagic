@@ -8,7 +8,7 @@ experiment_name = 'edsr_x2c64b16_1xb16-300k_div2k_group_dro'
 work_dir = f'./work_dirs/{experiment_name}'
 save_dir = './work_dirs/'
 
-scale = 4
+scale = 2
 # model settings
 model = dict(
     type='BaseEditModel',

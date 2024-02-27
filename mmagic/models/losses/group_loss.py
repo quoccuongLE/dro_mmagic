@@ -8,7 +8,7 @@ import torch.nn.functional as F
 
 from mmdet.models.losses import binary_cross_entropy, cross_entropy, sigmoid_focal_loss
 
-from mmyolo.registry import MODELS
+from mmagic.registry import MODELS
 
 
 def _averaging_by_group_legacy(arr: torch.Tensor, n_groups: int, group_ids: List[int]) -> Tuple[torch.Tensor, List[float]]:
