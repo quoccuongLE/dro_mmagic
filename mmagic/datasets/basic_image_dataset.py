@@ -255,3 +255,8 @@ class BasicImageDataset(BaseDataset):
                 path_list.append(img_path)
 
         return path_list
+
+    def get_data_info(self, idx):
+        data_info = super().get_data_info(idx)
+        data_info["group_id"] = self.metainfo["group_id"]
+        return data_info

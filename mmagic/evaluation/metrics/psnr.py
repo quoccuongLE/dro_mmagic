@@ -59,7 +59,7 @@ class PSNR(BaseSampleWiseMetric):
         self.input_order = input_order
         self.convert_to = convert_to
 
-    def process_image(self, gt, pred, mask):
+    def process_image(self, gt, pred, mask=None):
         """Process an image.
 
         Args:
@@ -76,7 +76,9 @@ class PSNR(BaseSampleWiseMetric):
             crop_border=self.crop_border,
             input_order=self.input_order,
             convert_to=self.convert_to,
-            channel_order=self.channel_order)
+            channel_order=self.channel_order,
+            mask=mask
+            )
 
 
 def psnr(img1,
@@ -84,7 +86,9 @@ def psnr(img1,
          crop_border=0,
          input_order='HWC',
          convert_to=None,
-         channel_order='rgb'):
+         channel_order='rgb',
+         mask=None
+         ):
     """Calculate PSNR (Peak Signal-to-Noise Ratio).
 
     Ref: https://en.wikipedia.org/wiki/Peak_signal-to-noise_ratio
@@ -101,6 +105,7 @@ def psnr(img1,
             the images are assumed to be in BGR order. Options are 'Y' and
             None. Default: None.
         channel_order (str): The channel order of image. Default: 'rgb'.
+        mask (Torch | np.ndarray): Mask of evaluation.
 
     Returns:
         result (float): PSNR result.
@@ -122,7 +127,11 @@ def psnr(img1,
         convert_to=convert_to,
         channel_order=channel_order)
 
-    mse_value = ((img1 - img2)**2).mean()
+    if mask:
+        diff_sqr = ((img1 - img2) * mask) ** 2
+        mse_value = diff_sqr.sum() / mask.sum()
+    else:
+        mse_value = ((img1 - img2)**2).mean()
     if mse_value == 0:
         result = float('inf')
     else:

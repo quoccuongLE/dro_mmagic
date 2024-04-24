@@ -59,7 +59,7 @@ class SNR(BaseSampleWiseMetric):
         self.input_order = input_order
         self.convert_to = convert_to
 
-    def process_image(self, gt, pred, mask):
+    def process_image(self, gt, pred, mask=None):
         """Process an image.
 
         Args:
@@ -76,7 +76,9 @@ class SNR(BaseSampleWiseMetric):
             crop_border=self.crop_border,
             input_order=self.input_order,
             convert_to=self.convert_to,
-            channel_order=self.channel_order)
+            channel_order=self.channel_order,
+            mask=mask
+            )
 
 
 def snr(gt,
@@ -84,7 +86,9 @@ def snr(gt,
         crop_border=0,
         input_order='HWC',
         convert_to=None,
-        channel_order='rgb'):
+        channel_order='rgb',
+        mask=None
+        ):
     """Calculate PSNR (Peak Signal-to-Noise Ratio).
 
     Ref: https://en.wikipedia.org/wiki/Peak_signal-to-noise_ratio
@@ -101,6 +105,7 @@ def snr(gt,
             the images are assumed to be in BGR order. Options are 'Y' and
             None. Default: None.
         channel_order (str): The channel order of image. Default: 'rgb'.
+        mask (Torch | np.ndarray): Mask of evaluation.
 
     Returns:
         float: SNR result.
@@ -122,8 +127,14 @@ def snr(gt,
         convert_to=convert_to,
         channel_order=channel_order)
 
-    signal = ((gt)**2).mean()
-    noise = ((gt - pred)**2).mean()
+    diff = gt - pred
+
+    if mask:
+        signal = ((gt * mask) ** 2).sum() / mask.sum()
+        noise = ((diff * mask) ** 2).sum() / mask.sum()
+    else:
+        signal = ((gt)**2).mean()
+        noise = ((diff) ** 2).mean()
 
     result = 10. * np.log10(signal / noise)
 
