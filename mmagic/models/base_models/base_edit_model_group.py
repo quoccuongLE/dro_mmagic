@@ -32,35 +32,26 @@ class BaseEditModelGroup(BaseEditModel):
             :meth:`forward`. Default: None.
     """
 
-    def __init__(self,
-                 generator: dict,
-                 pixel_loss: dict,
-                 group_loss: Optional[dict] = None,
-                 train_cfg: Optional[dict] = None,
-                 test_cfg: Optional[dict] = None,
-                 init_cfg: Optional[dict] = None,
-                 data_preprocessor: Optional[dict] = None):
-        super().__init__(
-            init_cfg=init_cfg, data_preprocessor=data_preprocessor)
-
-        self.train_cfg = train_cfg
-        self.test_cfg = test_cfg
-
-        # generator
-        self.generator = MODELS.build(generator)
-
-        # loss
-        self.pixel_loss = MODELS.build(pixel_loss)
+    def __init__(
+        self,
+        generator: dict,
+        pixel_loss: dict,
+        group_loss: Optional[dict] = None,
+        train_cfg: Optional[dict] = None,
+        test_cfg: Optional[dict] = None,
+        init_cfg: Optional[dict] = None,
+        data_preprocessor: Optional[dict] = None,
+    ):
+        super().__init__(generator, pixel_loss, train_cfg, test_cfg, init_cfg, data_preprocessor)
         if group_loss:
             self.group_loss = MODELS.build(group_loss)
             self.pixel_loss.sample_wise = True
         else:
             self.group_loss = None
 
-    def forward_train(self,
-                      inputs: torch.Tensor,
-                      data_samples: Optional[List[DataSample]] = None,
-                      **kwargs) -> Dict[str, torch.Tensor]:
+    def forward_train(
+        self, inputs: torch.Tensor, data_samples: Optional[List[DataSample]] = None, **kwargs
+    ) -> Dict[str, torch.Tensor]:
         """Forward training. Returns dict of losses of training.
 
         Args:
@@ -80,7 +71,7 @@ class BaseEditModelGroup(BaseEditModel):
         if self.group_loss:
             # TODO: placeholder
             pairwise_group_labels = None
-            loss = self.group_loss_obj(
+            loss = self.group_loss(
                 pred=None, target=None, group_id_coords=pairwise_group_labels, precomputed_loss=loss
             )
 

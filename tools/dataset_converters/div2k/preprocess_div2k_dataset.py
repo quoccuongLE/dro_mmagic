@@ -12,6 +12,8 @@ import mmcv
 import mmengine
 import numpy as np
 
+_METHOD = "nearest"  # bicubic bilinear nearest
+
 
 def generate_anno_file(args):
     """Generate annotation file for DIV2K datasets from the ground-truth
@@ -77,13 +79,13 @@ def main_extract_subimages(args):
     opt['crop_size'] = args.crop_size
     opt['step'] = args.step
     opt['thresh_size'] = args.thresh_size
-    extract_subimages(opt)
+    # extract_subimages(opt)
 
     for scale in args.scales:
         opt['input_folder'] = osp.join(args.data_root,
-                                       f'DIV2K_train_LR_bicubic/X{scale}')
+                                       f'DIV2K_train_LR_{_METHOD}/X{scale}')
         opt['save_folder'] = osp.join(args.data_root,
-                                      f'DIV2K_train_LR_bicubic/X{scale}_sub')
+                                      f'DIV2K_train_LR_{_METHOD}/X{scale}_sub')
         opt['crop_size'] = args.crop_size // scale
         opt['step'] = args.step // scale
         opt['thresh_size'] = args.thresh_size // scale
@@ -189,15 +191,15 @@ def make_lmdb_for_div2k(data_root):
 
     folder_paths = [
         osp.join(data_root, 'DIV2K_train_HR_sub'),
-        osp.join(data_root, 'DIV2K_train_LR_bicubic/X2_sub'),
-        osp.join(data_root, 'DIV2K_train_LR_bicubic/X3_sub'),
-        osp.join(data_root, 'DIV2K_train_LR_bicubic/X4_sub')
+        osp.join(data_root, 'DIV2K_train_LR_{_METHOD}/X2_sub'),
+        osp.join(data_root, 'DIV2K_train_LR_{_METHOD}/X3_sub'),
+        osp.join(data_root, 'DIV2K_train_LR_{_METHOD}/X4_sub')
     ]
     lmdb_paths = [
         osp.join(data_root, 'DIV2K_train_HR_sub.lmdb'),
-        osp.join(data_root, 'DIV2K_train_LR_bicubic_X2_sub.lmdb'),
-        osp.join(data_root, 'DIV2K_train_LR_bicubic_X3_sub.lmdb'),
-        osp.join(data_root, 'DIV2K_train_LR_bicubic_X4_sub.lmdb')
+        osp.join(data_root, 'DIV2K_train_LR_{_METHOD}_X2_sub.lmdb'),
+        osp.join(data_root, 'DIV2K_train_LR_{_METHOD}_X3_sub.lmdb'),
+        osp.join(data_root, 'DIV2K_train_LR_{_METHOD}_X4_sub.lmdb')
     ]
 
     for folder_path, lmdb_path in zip(folder_paths, lmdb_paths):
@@ -385,7 +387,7 @@ def parse_args():
     parser.add_argument(
         '--scales',
         nargs='*',
-        default=[2, 3, 4],
+        default=[3, 4],
         type=int,
         help='scale factor list')
     parser.add_argument(

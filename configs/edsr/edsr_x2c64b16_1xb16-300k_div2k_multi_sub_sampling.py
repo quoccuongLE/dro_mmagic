@@ -4,7 +4,7 @@ _base_ = [
     '../_base_/default_runtime.py', '../_base_/datasets/sisr_x2_test_config.py'
 ]
 
-experiment_name = 'edsr_x2c64b16_1xb16-300k_div2k_group_dro'
+experiment_name = 'edsr_x2c64b16_1xb16-300k_div2k_multi_subsampling'
 work_dir = f'./work_dirs/{experiment_name}'
 save_dir = './work_dirs/'
 
@@ -81,16 +81,40 @@ train_dataloader = dict(
     batch_size=16,
     drop_last=True,
     persistent_workers=False,
-    sampler=dict(type='InfiniteSampler', shuffle=True),
+    sampler=dict(type="InfiniteSampler", shuffle=True),
     dataset=dict(
-        type=dataset_type,
-        ann_file='meta_info_DIV2K800sub_GT.txt',
-        metainfo=dict(dataset_type='div2k', task_name='sisr'),
-        data_root=data_root + '/DIV2K',
-        data_prefix=dict(
-            img='DIV2K_train_LR_bicubic/X2_sub', gt='DIV2K_train_HR_sub'),
-        filename_tmpl=dict(img='{}', gt='{}'),
-        pipeline=train_pipeline))
+        type="ConcatDataset",
+        datasets=[
+            dict(
+                type=dataset_type,
+                ann_file="meta_info_DIV2K800sub_GT.txt",
+                metainfo=dict(dataset_type="div2k", task_name="sisr"),
+                data_root=data_root + "/DIV2K",
+                data_prefix=dict(img=f"DIV2K_train_LR_bicubic/X{scale}_sub", gt="DIV2K_train_HR_sub"),
+                filename_tmpl=dict(img="{}", gt="{}"),
+                pipeline=train_pipeline,
+            ),
+            dict(
+                type=dataset_type,
+                ann_file="meta_info_DIV2K800sub_GT.txt",
+                metainfo=dict(dataset_type="div2k", task_name="sisr"),
+                data_root=data_root + "/DIV2K",
+                data_prefix=dict(img=f"DIV2K_train_LR_bilinear/X{scale}_sub", gt="DIV2K_train_HR_sub"),
+                filename_tmpl=dict(img="{}", gt="{}"),
+                pipeline=train_pipeline,
+            ),
+            dict(
+                type=dataset_type,
+                ann_file="meta_info_DIV2K800sub_GT.txt",
+                metainfo=dict(dataset_type="div2k", task_name="sisr"),
+                data_root=data_root + "/DIV2K",
+                data_prefix=dict(img=f"DIV2K_train_LR_nearest/X{scale}_sub", gt="DIV2K_train_HR_sub"),
+                filename_tmpl=dict(img="{}", gt="{}"),
+                pipeline=train_pipeline,
+            ),
+        ],
+    ),
+)
 
 val_dataloader = dict(
     num_workers=4,
@@ -101,7 +125,7 @@ val_dataloader = dict(
         type=dataset_type,
         metainfo=dict(dataset_type='set5', task_name='sisr'),
         data_root=data_root + '/Set5',
-        data_prefix=dict(img='LRbicx2', gt='GTmod12'),
+        data_prefix=dict(img=f'LRbicx{scale}', gt='GTmod12'),
         pipeline=val_pipeline))
 
 val_evaluator = dict(
