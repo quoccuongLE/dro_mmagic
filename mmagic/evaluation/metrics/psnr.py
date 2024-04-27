@@ -77,7 +77,7 @@ class PSNR(BaseSampleWiseMetric):
             input_order=self.input_order,
             convert_to=self.convert_to,
             channel_order=self.channel_order,
-            mask=mask
+            mask=None
             )
 
 
@@ -128,6 +128,12 @@ def psnr(img1,
         channel_order=channel_order)
 
     if mask:
+        mask = img_transform(
+                mask,
+                crop_border=crop_border,
+                input_order=input_order,
+                convert_to=convert_to,
+                channel_order=channel_order)
         diff_sqr = ((img1 - img2) * mask) ** 2
         mse_value = diff_sqr.sum() / mask.sum()
     else:

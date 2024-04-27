@@ -1,12 +1,14 @@
 import os
 
 _base_ = [
-    '../_base_/default_runtime.py', '../_base_/datasets/sisr_x2_test_config.py'
+    '../_base_/default_runtime.py', '../_base_/datasets/sisr_x4_test_config.py'
 ]
 
 experiment_name = 'edsr_x4c64b16_1xb16-300k_div2k_multi_subsampling'
 work_dir = f'./work_dirs/{experiment_name}'
 save_dir = './work_dirs/'
+
+load_from = None  # based on pre-trained x2 model
 
 scale = 4
 # model settings
@@ -24,7 +26,7 @@ model = dict(
         rgb_std=[1.0, 1.0, 1.0]),
     pixel_loss=dict(type='L1Loss', loss_weight=1.0, reduction='mean'),
     train_cfg=dict(),
-    test_cfg=dict(),
+    test_cfg=dict(metrics=['PSNR'], crop_border=scale),
     data_preprocessor=dict(
         type='DataPreprocessor',
         mean=[0., 0., 0.],
@@ -45,7 +47,7 @@ train_pipeline = [
         channel_order='rgb',
         imdecode_backend='cv2'),
     dict(type='SetValues', dictionary=dict(scale=scale)),
-    dict(type='PairedRandomCrop', gt_patch_size=96),
+    dict(type='PairedRandomCrop', gt_patch_size=196),
     dict(
         type='Flip',
         keys=['img', 'gt'],
@@ -81,7 +83,7 @@ train_dataloader = dict(
     batch_size=16,
     drop_last=True,
     persistent_workers=False,
-    sampler=dict(type="InfiniteSampler", shuffle=True),
+    sampler=dict(type='InfiniteSampler', shuffle=True),
     dataset=dict(
         type="ConcatDataset",
         datasets=[

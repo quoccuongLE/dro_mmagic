@@ -77,7 +77,7 @@ class SNR(BaseSampleWiseMetric):
             input_order=self.input_order,
             convert_to=self.convert_to,
             channel_order=self.channel_order,
-            mask=mask
+            mask=None
             )
 
 
@@ -130,6 +130,12 @@ def snr(gt,
     diff = gt - pred
 
     if mask:
+        mask = img_transform(
+            mask,
+            crop_border=crop_border,
+            input_order=input_order,
+            convert_to=convert_to,
+            channel_order=channel_order)
         signal = ((gt * mask) ** 2).sum() / mask.sum()
         noise = ((diff * mask) ** 2).sum() / mask.sum()
     else:
