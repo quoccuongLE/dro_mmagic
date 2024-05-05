@@ -1,7 +1,6 @@
 import os
 
-_base_ = ["edsr_x2c64b16_1xb16-300k_div2k_multi_sub_sampling_eval.py"]
-
+_base_ = ["../edsr_x4c64b16_1xb16-300k_div2k_multi_sub_sampling.py"]
 
 scale = 4
 dataset_type = "BasicImageDataset"
@@ -31,3 +30,14 @@ test_dataloader = dict(
     ),
 )
 test_dataloader = [test_dataloader]
+
+val_evaluator = dict(
+    type="Evaluator",
+    metrics=[
+        dict(type="MAE"),
+        dict(type="PSNR", crop_border=scale),
+        dict(type="SSIM", crop_border=scale),
+    ],
+)
+
+test_evaluator = [val_evaluator]

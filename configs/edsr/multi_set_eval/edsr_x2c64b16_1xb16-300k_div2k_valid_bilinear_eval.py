@@ -1,6 +1,6 @@
 import os
 
-_base_ = ["edsr_x2c64b16_1xb16-300k_div2k_multi_sub_sampling_eval.py"]
+_base_ = ["../edsr_x2c64b16_1xb16-300k_div2k_multi_sub_sampling_eval.py"]
 
 
 scale = 2

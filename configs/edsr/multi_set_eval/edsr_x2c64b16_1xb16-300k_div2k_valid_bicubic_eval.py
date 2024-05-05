@@ -1,13 +1,13 @@
 import os
 
-_base_ = ["edsr_x2c64b16_1xb16-300k_div2k_multi_sub_sampling_eval.py"]
+_base_ = ["../edsr_x2c64b16_1xb16-300k_div2k_multi_sub_sampling_eval.py"]
 
 
-scale = 3
+scale = 2
+interp_mode = "bicubic"
 dataset_type = "BasicImageDataset"
 data_root = os.environ.get("DSDIR", "/media/Data2-HDD8/datasets")
 
-interp_mode = "bilinear"
 experiment_name = f"edsr_x{scale}c64b16_1xb16-300k_div2k_valid_{interp_mode}_multi_interp"
 work_dir = f"./work_dirs/{experiment_name}"
 

@@ -1,13 +1,12 @@
 import os
 
-_base_ = ["edsr_x2c64b16_1xb16-300k_div2k_multi_sub_sampling_eval.py"]
+_base_ = ["../edsr_x3c64b16_1xb16-300k_div2k_multi_sub_sampling.py"]
 
-
-scale = 4
+scale = 3
 dataset_type = "BasicImageDataset"
 data_root = os.environ.get("DSDIR", "/media/Data2-HDD8/datasets")
 
-interp_mode = "bilinear"
+interp_mode = "bicubic"
 experiment_name = f"edsr_x{scale}c64b16_1xb16-300k_div2k_valid_{interp_mode}_multi_interp"
 work_dir = f"./work_dirs/{experiment_name}"
 
@@ -16,6 +15,15 @@ test_pipeline = [
     dict(type="LoadImageFromFile", key="gt", color_type="color", channel_order="rgb", imdecode_backend="cv2"),
     dict(type="PackInputs"),
 ]
+
+val_evaluator = dict(
+    type="Evaluator",
+    metrics=[
+        dict(type="MAE"),
+        dict(type="PSNR", crop_border=scale),
+        dict(type="SSIM", crop_border=scale),
+    ],
+)
 
 test_dataloader = dict(
     num_workers=4,
@@ -30,4 +38,6 @@ test_dataloader = dict(
         pipeline=test_pipeline,
     ),
 )
+
 test_dataloader = [test_dataloader]
+test_evaluator = [val_evaluator]
