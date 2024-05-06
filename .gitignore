@@ -129,7 +129,7 @@ tests/data/out
 resources/
 
 # Pytorch
-*.pth
+# *.pth
 
 # onnx and tensorrt
 *.onnx
@@ -158,3 +158,4 @@ tmp/
 .venv/
 .env
 dev.env
+weights/
