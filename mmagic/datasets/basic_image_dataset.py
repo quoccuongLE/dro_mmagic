@@ -260,3 +260,59 @@ class BasicImageDataset(BaseDataset):
         data_info = super().get_data_info(idx)
         # data_info["group_id"] = self.metainfo["group_id"]
         return data_info
+
+
+@DATASETS.register_module()
+class GroupImageDataset(BasicImageDataset):
+
+    def __init__(
+        self,
+        ann_file: str = "",
+        metainfo: Optional[dict] = None,
+        data_root: Optional[str] = None,
+        data_prefix: dict = dict(img=""),
+        pipeline: List[Union[dict, Callable]] = [],
+        test_mode: bool = False,
+        filename_tmpl: dict = dict(),
+        search_key: Optional[str] = None,
+        backend_args: Optional[dict] = None,
+        img_suffix: Optional[Union[str, Tuple[str]]] = IMG_EXTENSIONS,
+        recursive: bool = False,
+        **kwards,
+    ):
+        super().__init__(
+            ann_file,
+            metainfo,
+            data_root,
+            data_prefix,
+            pipeline,
+            test_mode,
+            filename_tmpl,
+            search_key,
+            backend_args,
+            img_suffix,
+            recursive,
+            **kwards,
+        )
+        self.group_id = metainfo['group_id']
+
+    def __getitem__(self, idx: int) -> dict:
+        """Get the idx-th image and data information of dataset after
+        ``self.pipeline``, and ``full_init`` will be called if the dataset has
+        not been fully initialized.
+
+        During training phase, if ``self.pipeline`` get ``None``,
+        ``self._rand_another`` will be called until a valid image is fetched or
+         the maximum limit of refetech is reached.
+
+        Args:
+            idx (int): The index of self.data_list.
+
+        Returns:
+            dict: The idx-th image and data information of dataset after
+            ``self.pipeline``.
+        """
+        data = super().__getitem__(idx=idx)
+        data['data_samples'].set_metainfo(dict(group_id=self.group_id))
+
+        return data

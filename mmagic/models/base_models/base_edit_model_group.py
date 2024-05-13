@@ -8,7 +8,7 @@ from mmagic.registry import MODELS
 from mmagic.structures import DataSample
 
 
-@MODELS.register_module()
+@MODELS.register_module(name="BaseEditModelGroup")
 class BaseEditModelGroup(BaseEditModel):
     """Base model for image and video editing.
 
