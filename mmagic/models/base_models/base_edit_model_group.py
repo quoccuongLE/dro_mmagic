@@ -69,10 +69,9 @@ class BaseEditModelGroup(BaseEditModel):
 
         loss = self.pixel_loss(feats, batch_gt_data)
         if self.group_loss:
-            # TODO: placeholder
-            pairwise_group_labels = None
+            pairwise_group_labels = torch.Tensor(data_samples.group_id).to(device="cuda:0").view(-1, 1, 1, 1)
             loss = self.group_loss(
-                pred=None, target=None, group_id_coords=pairwise_group_labels, precomputed_loss=loss
+                group_id_mat=pairwise_group_labels, precomputed_loss=loss, group_count=[2000, 1000, 500]
             )
 
         return dict(loss=loss)

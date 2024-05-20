@@ -278,6 +278,7 @@ class GroupImageDataset(BasicImageDataset):
         backend_args: Optional[dict] = None,
         img_suffix: Optional[Union[str, Tuple[str]]] = IMG_EXTENSIONS,
         recursive: bool = False,
+        group_id: Optional[int] = None,
         **kwards,
     ):
         super().__init__(
@@ -294,7 +295,7 @@ class GroupImageDataset(BasicImageDataset):
             recursive,
             **kwards,
         )
-        self.group_id = metainfo['group_id']
+        self.group_id = group_id
 
     def __getitem__(self, idx: int) -> dict:
         """Get the idx-th image and data information of dataset after

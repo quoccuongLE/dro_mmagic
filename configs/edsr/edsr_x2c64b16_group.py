@@ -23,10 +23,10 @@ model = dict(
         rgb_mean=[0.4488, 0.4371, 0.4040],
         rgb_std=[1.0, 1.0, 1.0],
     ),
-    pixel_loss=dict(type="L1Loss", loss_weight=1.0, reduction="mean"),
+    pixel_loss=dict(type="L1Loss", loss_weight=1.0, reduction="none", sample_wise=True),
     group_loss=dict(
         type="GroupLoss",
-        group_mapping="data/tmp/cls_id_coco17.json",
+        group_mapping="data/tmp/cls_sr.json",
         is_robust=True,
         
     ),
@@ -96,7 +96,8 @@ train_dataloader = dict(
             dict(
                 type=dataset_type,
                 ann_file="meta_info_DIV2K800sub_GT.txt",
-                metainfo=dict(dataset_type="div2k", task_name="sisr", group_id=0),
+                metainfo=dict(dataset_type="div2k", task_name="sisr"),
+                group_id=0,
                 data_root=data_root + "/DIV2K",
                 data_prefix=dict(img=f"DIV2K_train_LR_bicubic/X{scale}_sub", gt="DIV2K_train_HR_sub"),
                 filename_tmpl=dict(img="{}", gt="{}"),
@@ -105,7 +106,8 @@ train_dataloader = dict(
             dict(
                 type=dataset_type,
                 ann_file="meta_info_DIV2K800sub_GT.txt",
-                metainfo=dict(dataset_type="div2k", task_name="sisr", group_id=0),
+                metainfo=dict(dataset_type="div2k", task_name="sisr"),
+                group_id=1,
                 data_root=data_root + "/DIV2K",
                 data_prefix=dict(img=f"DIV2K_train_LR_bilinear/X{scale}_sub", gt="DIV2K_train_HR_sub"),
                 filename_tmpl=dict(img="{}", gt="{}"),
@@ -114,7 +116,8 @@ train_dataloader = dict(
             dict(
                 type=dataset_type,
                 ann_file="meta_info_DIV2K800sub_GT.txt",
-                metainfo=dict(dataset_type="div2k", task_name="sisr", group_id=0),
+                metainfo=dict(dataset_type="div2k", task_name="sisr"),
+                group_id=2,
                 data_root=data_root + "/DIV2K",
                 data_prefix=dict(img=f"DIV2K_train_LR_nearest/X{scale}_sub", gt="DIV2K_train_HR_sub"),
                 filename_tmpl=dict(img="{}", gt="{}"),
