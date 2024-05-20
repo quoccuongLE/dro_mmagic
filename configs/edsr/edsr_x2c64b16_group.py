@@ -24,6 +24,12 @@ model = dict(
         rgb_std=[1.0, 1.0, 1.0],
     ),
     pixel_loss=dict(type="L1Loss", loss_weight=1.0, reduction="mean"),
+    group_loss=dict(
+        type="GroupLoss",
+        group_mapping="data/tmp/cls_id_coco17.json",
+        is_robust=True,
+        
+    ),
     train_cfg=dict(),
     test_cfg=dict(),
     data_preprocessor=dict(
