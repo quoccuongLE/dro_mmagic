@@ -24,12 +24,9 @@ model = dict(
         rgb_std=[1.0, 1.0, 1.0],
     ),
     pixel_loss=dict(type="L1Loss", loss_weight=1.0, reduction="none", sample_wise=True),
-    group_loss=dict(
-        type="GroupLoss",
-        group_mapping="data/tmp/cls_sr.json",
-        is_robust=True,
-        
-    ),
+    group_loss=dict(type="GroupLoss", group_mapping="data/tmp/cls_sr.json", is_robust=True, adj=0.01),
+    group_count=[4, 2, 1],
+    group_ids=[0, 1, 2],
     train_cfg=dict(),
     test_cfg=dict(),
     data_preprocessor=dict(

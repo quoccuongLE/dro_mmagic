@@ -1,4 +1,5 @@
 # Copyright (c) Quoc Cuong LE. All rights reserved.
+from copy import deepcopy
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import json
@@ -132,7 +133,6 @@ class GroupLoss(nn.Module):
         self.group_map = group_map
         self.group_ids = torch.IntTensor(list(set(group_map.values())))
 
-
         self._group_counts = torch.IntTensor(list(group_counts.values()))
         self.n_groups = len(group_counts)
         self.group_frac = torch.FloatTensor(list(group_counts.values())) / sum(list(group_counts.values()))
@@ -174,35 +174,31 @@ class GroupLoss(nn.Module):
         """
 
         # Group loss computation
-        loss_by_group = _averaging_by_group(
-            ndarray=per_sample_losses,
-            group_count=group_count,
-            group_ids=group_ids,
-            group_id_mat=group_id_mat)
-
-        # Update historical losses
-        if self.is_robust:
-            self.update_exp_avg_loss(loss_by_group.to(device="cpu"), group_count.to(device="cpu"))
+        _loss_per_group = {}
+        for idx, group_id in enumerate(group_ids):
+            assert idx == group_id, "This implementation only accepts group IDs, which also are indexes, e.g. from 0 to N"
+            _loss_per_group[group_id] = per_sample_losses[group_id_mat == group_id, ...]
 
         # compute overall loss
-        if not self.is_robust:
+        if self.is_robust:
+            loss_per_group = [loss.mean() / count for loss, count in zip(_loss_per_group.values(), group_count)]
+            loss_per_group = torch.stack(loss_per_group)
+            # Update historical losses
+            self.update_exp_avg_loss(loss_per_group.to(device="cpu"), group_count.to(device="cpu"))
+            if self.btl:
+                actual_loss, weights = self.compute_robust_loss_btl(loss_per_group)
+            else:
+                actual_loss, weights = self.compute_robust_loss(loss_per_group)
+
+        else:
             weights = None
             if self.avg_factor:
                 actual_loss = per_sample_losses.mean()
             else:
                 actual_loss = per_sample_losses.sum()
-        else:
-            if self.btl:
-                actual_loss, weights = self.compute_robust_loss_btl(loss_by_group)
-            else:
-                actual_loss, weights = self.compute_robust_loss(loss_by_group)
-            if not self.avg_factor:
-                # TODO: Review this code. Only correct for mmcls, not mmdet. In mmdet,
-                # avg_factor = True, meaning never run through this part
-                # Adaptation to the implementation of loss in MMdetection
-                # An averaging over the total number of samples (num_total_samples) outside of loss function
-                # By default, avg_factor should be None to comply with losses object in MMDetection
-                actual_loss *= per_sample_losses.shape[0]
+            with torch.no_grad():
+                loss_per_group = torch.stack(list(_loss_per_group.values()))
+                loss_per_group = loss_per_group / self._group_counts
 
         return actual_loss * self.loss_weight
 
@@ -212,9 +208,8 @@ class GroupLoss(nn.Module):
             group_loss (torch.Tensor): Loss compounding individual group
 
         """
-        adjusted_loss = group_loss
         if torch.all(self.adj > 0):
-            adjusted_loss += self.adj.to(group_loss.device) / torch.sqrt(self._group_counts.to(group_loss.device))
+            adjusted_loss = group_loss + self.adj.to(group_loss.device) / torch.sqrt(self._group_counts.to(group_loss.device))
         if self.normalize_loss:
             adjusted_loss /= adjusted_loss.sum()
         self.adv_probs *= torch.exp(self.step_size * adjusted_loss.data.to(device="cpu"))

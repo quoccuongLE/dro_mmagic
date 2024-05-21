@@ -37,6 +37,8 @@ class BaseEditModelGroup(BaseEditModel):
         generator: dict,
         pixel_loss: dict,
         group_loss: Optional[dict] = None,
+        group_count: Optional[list[int]] = None,
+        group_ids: Optional[list[int]] = None,
         train_cfg: Optional[dict] = None,
         test_cfg: Optional[dict] = None,
         init_cfg: Optional[dict] = None,
@@ -44,6 +46,8 @@ class BaseEditModelGroup(BaseEditModel):
     ):
         super().__init__(generator, pixel_loss, train_cfg, test_cfg, init_cfg, data_preprocessor)
         if group_loss:
+            self.group_count = group_count
+            self.group_ids = group_ids
             self.group_loss = MODELS.build(group_loss)
             self.pixel_loss.sample_wise = True
         else:
@@ -69,9 +73,12 @@ class BaseEditModelGroup(BaseEditModel):
 
         loss = self.pixel_loss(feats, batch_gt_data)
         if self.group_loss:
-            pairwise_group_labels = torch.Tensor(data_samples.group_id).to(device="cuda:0").view(-1, 1, 1, 1)
+            pairwise_group_labels = torch.Tensor(data_samples.group_id).to(device=loss.device)
             loss = self.group_loss(
-                group_id_mat=pairwise_group_labels, precomputed_loss=loss, group_count=[2000, 1000, 500]
+                group_id_mat=pairwise_group_labels,
+                precomputed_loss=loss,
+                group_count=self.group_count,
+                group_ids=self.group_ids,
             )
 
         return dict(loss=loss)
