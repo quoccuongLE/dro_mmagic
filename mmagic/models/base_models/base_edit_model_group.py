@@ -8,7 +8,7 @@ from mmagic.registry import MODELS
 from mmagic.structures import DataSample
 
 
-@MODELS.register_module()
+@MODELS.register_module(name="BaseEditModelGroup")
 class BaseEditModelGroup(BaseEditModel):
     """Base model for image and video editing.
 
@@ -37,6 +37,8 @@ class BaseEditModelGroup(BaseEditModel):
         generator: dict,
         pixel_loss: dict,
         group_loss: Optional[dict] = None,
+        group_count: Optional[list[int]] = None,
+        group_ids: Optional[list[int]] = None,
         train_cfg: Optional[dict] = None,
         test_cfg: Optional[dict] = None,
         init_cfg: Optional[dict] = None,
@@ -44,6 +46,8 @@ class BaseEditModelGroup(BaseEditModel):
     ):
         super().__init__(generator, pixel_loss, train_cfg, test_cfg, init_cfg, data_preprocessor)
         if group_loss:
+            self.group_count = group_count
+            self.group_ids = group_ids
             self.group_loss = MODELS.build(group_loss)
             self.pixel_loss.sample_wise = True
         else:
@@ -69,10 +73,12 @@ class BaseEditModelGroup(BaseEditModel):
 
         loss = self.pixel_loss(feats, batch_gt_data)
         if self.group_loss:
-            # TODO: placeholder
-            pairwise_group_labels = None
+            pairwise_group_labels = torch.Tensor(data_samples.group_id).to(device=loss.device)
             loss = self.group_loss(
-                pred=None, target=None, group_id_coords=pairwise_group_labels, precomputed_loss=loss
+                group_id_mat=pairwise_group_labels,
+                precomputed_loss=loss,
+                group_count=self.group_count,
+                group_ids=self.group_ids,
             )
 
         return dict(loss=loss)
