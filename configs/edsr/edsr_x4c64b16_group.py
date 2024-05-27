@@ -1,14 +1,14 @@
 import os
 
 _base_ = [
-    '../_base_/default_runtime.py', '../_base_/datasets/sisr_x2_test_config.py'
+    '../_base_/default_runtime.py', '../_base_/datasets/sisr_x4_test_config.py'
 ]
 
-experiment_name = 'edsr_x2c64b16_1xb16-300k_div2k_group'
+experiment_name = 'edsr_x4c64b16_1xb16-300k_div2k_group'
 work_dir = f'./work_dirs/{experiment_name}'
 save_dir = './work_dirs/'
 
-scale = 2
+scale = 4
 # model settings
 model = dict(
     type="BaseEditModelGroup",
