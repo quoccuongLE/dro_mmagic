@@ -159,3 +159,5 @@ tmp/
 .env
 dev.env
 weights/
+data/
+output/

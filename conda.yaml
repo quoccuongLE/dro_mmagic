@@ -3,13 +3,15 @@ channels:
   - defaults
   - pytorch
   - conda-forge
+  - fastai
 dependencies:
   - python=3.9
   - pytorch::pytorch=1.12.1
   - pytorch::torchvision=0.13.1
   - conda-forge::cudatoolkit=11.3
-  - conda-forge::opencv
+  - fastai::opencv-python-headless
   - conda-forge::matplotlib
+  - conda-force::accelerate
   - matplotlib
   - pip
   - pip:

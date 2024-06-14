@@ -1,7 +1,7 @@
 # config for model
-stable_diffusion_v15_url = 'Linaqruf/anything-v3.0'
+stable_diffusion_v15_url = "admruul/anything-v3.0"
 controlnet_hed_url = 'lllyasviel/sd-controlnet-hed'
-control_detector = 'lllyasviel/ControlNet'
+control_detector = "lllyasviel/Annotators"
 control_scheduler = 'UniPCMultistepScheduler'
 
 # method type : 'multi-frame rendering' or 'attention_injection'

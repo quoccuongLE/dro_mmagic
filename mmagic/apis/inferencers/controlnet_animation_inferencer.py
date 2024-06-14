@@ -92,6 +92,7 @@ class ControlnetAnimationInferencer(BaseMMagicInferencer):
     @torch.no_grad()
     def __call__(self,
                  prompt=None,
+                 img=None,
                  video=None,
                  negative_prompt=None,
                  controlnet_conditioning_scale=0.7,
@@ -137,36 +138,42 @@ class ControlnetAnimationInferencer(BaseMMagicInferencer):
         latent_mask = latent_mask.type(self.pipe.controlnet.dtype).cuda()
 
         # load the images
-        input_file_extension = os.path.splitext(video)[1]
-        from_video = True
-        all_images = []
-        if input_file_extension in VIDEO_EXTENSIONS:
-            video_reader = mmcv.VideoReader(video)
-            input_fps = int(video_reader.fps)
-            if output_fps is None:
-                output_fps = input_fps
-            if output_fps > input_fps:
-                output_fps = input_fps
-            sample_rate = int(input_fps / output_fps)
-
-            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-            video_writer = cv2.VideoWriter(save_path, fourcc, output_fps,
-                                           (image_width, image_height))
-            for frame in video_reader:
-                all_images.append(np.flip(frame, axis=2))
-        else:
-            frame_files = os.listdir(video)
-            frame_files = [os.path.join(video, f) for f in frame_files]
-            frame_files.sort()
-            for frame in frame_files:
-                frame_extension = os.path.splitext(frame)[1]
-                if frame_extension in IMAGE_EXTENSIONS:
-                    all_images.append(frame)
-
-            if not os.path.exists(save_path):
-                os.makedirs(save_path)
-
+        if img:
+            print("Found image input arg!")
             from_video = False
+            all_images = [img]
+            frame_files = [img]
+        else:
+            input_file_extension = os.path.splitext(video)[1]
+            from_video = True
+            all_images = []
+            if input_file_extension in VIDEO_EXTENSIONS:
+                video_reader = mmcv.VideoReader(video)
+                input_fps = int(video_reader.fps)
+                if output_fps is None:
+                    output_fps = input_fps
+                if output_fps > input_fps:
+                    output_fps = input_fps
+                sample_rate = int(input_fps / output_fps)
+
+                fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+                video_writer = cv2.VideoWriter(save_path, fourcc, output_fps,
+                                            (image_width, image_height))
+                for frame in video_reader:
+                    all_images.append(np.flip(frame, axis=2))
+            else:
+                frame_files = os.listdir(video)
+                frame_files = [os.path.join(video, f) for f in frame_files]
+                frame_files.sort()
+                for frame in frame_files:
+                    frame_extension = os.path.splitext(frame)[1]
+                    if frame_extension in IMAGE_EXTENSIONS:
+                        all_images.append(frame)
+
+                if not os.path.exists(save_path):
+                    os.makedirs(save_path)
+
+                from_video = False
 
         if self.inference_method == 'multi-frame rendering':
             # first result
